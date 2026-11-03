@@ -7,11 +7,14 @@
   <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
-  <!-- Pessoa 3: esta pagina funciona, mas é provisória.
-       Melhore o visual, separe em telas e acrescente o grafico. -->
+  <!-- Pessoa 3: esta pagina funciona, mas o visual é provisório.
+       Melhore o estilo, acrescente a tela de login e o gráfico. -->
 
   <header>
-    <h1>SentinelaOps</h1>
+    <div>
+      <h1>SentinelaOps</h1>
+      <div id="janela" class="detalhe"></div>
+    </div>
     <div class="perfil">
       Perfil:
       <select id="perfil">
@@ -23,9 +26,12 @@
   </header>
 
   <section class="acoes-admin">
-    <button id="btn-falha">Simular problema</button>
+    <button id="btn-falha">Simular degradação</button>
+    <button id="btn-disco">Simular disco cheio</button>
+    <button id="btn-pico">Simular horário de pico</button>
     <button id="btn-normal">Voltar ao normal</button>
     <button id="btn-limpar">Limpar histórico</button>
+    <a href="/relatorio.csv" class="botao-link">Baixar relatório</a>
   </section>
 
   <section id="status" class="card">Carregando...</section>
@@ -37,6 +43,9 @@
 
       <h2>Aguardando aprovação</h2>
       <div id="pendentes"></div>
+
+      <h2>Agendado para a janela de manutenção</h2>
+      <div id="agendadas"></div>
     </div>
     <div>
       <h2>Indicadores de negócio</h2>
@@ -44,6 +53,9 @@
 
       <h2>Inteligência artificial</h2>
       <div id="ia" class="card"></div>
+
+      <h2>Notificações</h2>
+      <div id="notificacoes" class="card"></div>
     </div>
   </section>
 

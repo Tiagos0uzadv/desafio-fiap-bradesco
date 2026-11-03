@@ -11,10 +11,12 @@ const LIMITE_ERROS = 3.0; // % de erros considerado normal
 const LIMITE_LATENCIA = 800; // ms considerado normal
 const MUITO_ERROS = 6.0; // % de erros "bem acima" do normal
 const MUITO_LATENCIA = 1500; // ms "bem acima" do normal
+const LIMITE_DISCO = 85; // % de uso do disco que dispara a limpeza
 
-function decidir(taxaErros, latenciaMs) {
+function decidir(taxaErros, latenciaMs, usoDisco = 0) {
   const errosAltos = taxaErros > LIMITE_ERROS;
   const lento = latenciaMs > LIMITE_LATENCIA;
+  const discoCheio = usoDisco > LIMITE_DISCO;
 
   // Os dois sinais juntos indicam degradacao do ambiente.
   if (errosAltos && lento) {
@@ -23,6 +25,19 @@ function decidir(taxaErros, latenciaMs) {
       evento: 'degradacao',
       recomendacao: 'Reiniciar o servico api_pagamentos',
       detalhe: `erros ${taxaErros}% (limite ${LIMITE_ERROS}%) e latencia ${latenciaMs} ms (limite ${LIMITE_LATENCIA} ms)`,
+    };
+  }
+
+  // Disco enchendo e um problema CONHECIDO e de BAIXO RISCO: ja sabemos a
+  // solucao (limpar arquivos temporarios) e ela nao derruba nada. Por isso o
+  // sistema pode resolver sozinho, sem incomodar ninguem.
+  if (discoCheio) {
+    return {
+      nivel: 'executar',
+      evento: 'disco_quase_cheio',
+      recomendacao: 'Limpar arquivos temporarios do servidor de arquivos',
+      detalhe: `uso do disco em ${usoDisco}% (limite ${LIMITE_DISCO}%)`,
+      risco: 'baixo',
     };
   }
 
@@ -50,24 +65,23 @@ function decidir(taxaErros, latenciaMs) {
     nivel: 'nenhum',
     evento: 'normal',
     recomendacao: 'Nenhuma acao necessaria',
-    detalhe: `erros ${taxaErros}%, latencia ${latenciaMs} ms`,
+    detalhe: `erros ${taxaErros}%, latencia ${latenciaMs} ms, disco ${usoDisco}%`,
   };
-
-  // TODO (Pessoa 2): nivel "executar" para falhas conhecidas de baixo risco
-  // (ex.: fila travada) e integracao com IA para escrever a recomendacao.
 }
 
-module.exports = { decidir, LIMITE_ERROS, LIMITE_LATENCIA };
+module.exports = { decidir, LIMITE_ERROS, LIMITE_LATENCIA, LIMITE_DISCO };
 
 // Teste rapido dos 4 casos quando rodado direto: node logica/regras.js
 if (require.main === module) {
   const casos = [
-    [1.0, 400],
-    [1.5, 1000],
-    [7.0, 500],
-    [8.0, 1800],
+    ['tudo normal', 1.0, 400, 50],
+    ['so lentidao', 1.5, 1000, 50],
+    ['erros muito altos', 7.0, 500, 50],
+    ['erros + lentidao (degradacao)', 8.0, 1800, 50],
+    ['disco quase cheio', 1.0, 400, 92],
+    ['degradacao tem prioridade', 8.0, 1800, 92],
   ];
-  for (const [erros, latencia] of casos) {
-    console.log(erros, latencia, '->', decidir(erros, latencia).nivel);
+  for (const [nome, erros, latencia, disco] of casos) {
+    console.log(nome.padEnd(32), '->', decidir(erros, latencia, disco).nivel);
   }
 }

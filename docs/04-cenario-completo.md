@@ -66,6 +66,59 @@ Repare que são **duas linhas**: uma quando o sistema decidiu pedir aprovação 
 outra quando o humano decidiu. É isso que torna o processo auditável — dá para
 reconstruir o que aconteceu, quem autorizou e qual foi o resultado.
 
+---
+
+# Segundo cenário: risco baixo e janela de manutenção
+
+O primeiro cenário mostra o sistema **parando** para pedir ajuda. Este mostra o
+sistema **agindo sozinho** — e sabendo a hora certa de agir.
+
+### 1. O sensor acusa
+
+O servidor de arquivos passa de 85% de uso do disco. É um problema conhecido,
+com solução conhecida (limpar arquivos temporários) que não derruba nada.
+
+### 2. O sistema decide executar
+
+Como é baixo risco, o nível de autonomia é **executar**: ninguém precisa
+aprovar.
+
+### 3. Mas o sistema olha o relógio
+
+Aqui está a parte que diferencia o projeto. Antes de agir, o sistema verifica
+se estamos em **horário de pico** (das 8h às 18h):
+
+| Situação | O que o sistema faz |
+| --- | --- |
+| Fora do pico | Executa imediatamente e registra |
+| Em horário de pico | **Agenda** para a próxima janela (18h) e notifica o responsável |
+
+Uma limpeza de disco no meio do expediente consome recursos e pode deixar o
+sistema lento para quem está trabalhando. O problema não é urgente, então pode
+esperar.
+
+### 4. A ação fica agendada
+
+O painel mostra a ação em "Agendado para a janela de manutenção", com a hora
+marcada. O responsável recebe uma notificação.
+
+### 5. Quando chega a hora
+
+Um agendador verifica a cada 5 segundos se alguma ação agendada já venceu. Ao
+vencer, ela é executada e registrada como `automatico (janela de manutencao)`.
+
+### 6. Se for urgente
+
+Um **administrador** pode clicar em "Executar agora" e antecipar. A auditoria
+registra que foi uma antecipação manual e quem fez. Um operador comum não pode:
+a API devolve 403.
+
+## A frase que resume os dois cenários
+
+> "Decidir o que fazer não basta: é preciso decidir quem decide e quando agir.
+> Risco alto espera um humano. Risco baixo o sistema resolve, mas na hora que
+> não atrapalha ninguém."
+
 ## Os quatro níveis de autonomia
 
 | Nível | Condição | Quem age |
@@ -73,7 +126,7 @@ reconstruir o que aconteceu, quem autorizou e qual foi o resultado.
 | Alertar | Um sinal acima do limite | Ninguém, só avisa |
 | Recomendar | Um sinal bem acima do limite | Sugere, humano decide |
 | Pedir aprovação | Os dois sinais juntos | Humano autoriza |
-| Executar | Falha conhecida de baixo risco | O sistema, sozinho |
+| Executar | Disco quase cheio (baixo risco) | O sistema, na janela de manutenção |
 
 Para ver os níveis mais baixos durante a demo, deixe o sistema rodando alguns
 segundos depois de voltar ao normal: os valores oscilam e às vezes cruzam um

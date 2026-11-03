@@ -21,6 +21,7 @@ const INICIAL = {
   eventos: [],
   acoes: [],
   auditoria: [],
+  notificacoes: [],
   proximoId: 1,
 };
 
@@ -30,6 +31,10 @@ function carregar() {
   if (dados) return dados;
   if (fs.existsSync(ARQUIVO)) {
     dados = JSON.parse(fs.readFileSync(ARQUIVO, 'utf8'));
+    // Se o arquivo veio de uma versao antiga, completa o que faltar.
+    for (const chave of Object.keys(INICIAL)) {
+      if (dados[chave] === undefined) dados[chave] = JSON.parse(JSON.stringify(INICIAL[chave]));
+    }
   } else {
     dados = JSON.parse(JSON.stringify(INICIAL));
     salvar();
@@ -56,6 +61,7 @@ function limpar() {
   d.eventos = [];
   d.acoes = [];
   d.auditoria = [];
+  d.notificacoes = [];
   d.proximoId = 1;
   salvar();
 }

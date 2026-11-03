@@ -34,21 +34,27 @@ backend/gerador.js   gera as métricas simuladas das 2 fontes
 backend/banco.js     lê e grava o arquivo de dados
 logica/regras.js     regras de decisão e níveis de autonomia
 logica/ia.js         chama o modelo de IA, com fallback para as regras
+logica/janela.js     janela de manutenção e horário de pico
+logica/notificacoes.js  notifica o responsável
+testes/testes.js     bateria de 52 testes automatizados
 frontend/            index.html, estilo.css, app.js
 docs/                documentação técnica do MVP
 apresentacao/        roteiro da demo e perguntas da banca
 
 COMO O SISTEMA FUNCIONA HOJE
-Duas fontes simuladas: aplicação web (taxa de erros) e API de pagamentos (tempo
-de resposta). A cada 3 segundos o painel chama GET /status, o back-end gera uma
-leitura e as regras decidem o nível de autonomia:
+Três fontes simuladas: aplicação web (taxa de erros), API de pagamentos (tempo
+de resposta) e servidor de arquivos (uso do disco, fazendo o papel de sensor).
+A cada 3 segundos o painel chama GET /status, o back-end gera uma leitura e as
+regras decidem o nível de autonomia:
 - 1 sinal acima do limite          -> alertar
 - 1 sinal bem acima do limite      -> recomendar
 - os 2 sinais juntos (degradação)  -> pedir aprovação (humano autoriza)
-- falha conhecida de baixo risco   -> executar (ainda não implementado)
+- disco quase cheio (baixo risco)  -> executar, mas em horário de pico a ação
+                                      é AGENDADA para a janela de manutenção
 A IA escreve a recomendação em linguagem natural; se falhar ou não houver chave
 de API, usa-se o texto das regras. Tudo gera registro de auditoria com evento,
-decisão, quem autorizou e resultado.
+decisão, quem autorizou e resultado. Há 52 testes automatizados: rode
+"node testes/testes.js" antes e depois de mexer em qualquer coisa.
 
 PERFIS DE ACESSO
 visualizador (só vê), operador (aprova ou rejeita ações) e admin (tudo, mais

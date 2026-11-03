@@ -19,7 +19,15 @@ ou `admin`). Rotas que exigem mais permissão respondem **403**.
 | /acoes/{id}/rejeitar | POST | Rejeita a ação e registra o motivo | Operador | **feito** |
 | /auditoria | GET | Evento, decisão, quem autorizou, resultado | Visualizador | **feito** |
 | /indicadores | GET | Números de negócio | Visualizador | **feito** |
+| /agendadas | GET | Ações agendadas para a janela de manutenção | Visualizador | **feito** |
+| /acoes/{id}/executar-agora | POST | Antecipa uma ação agendada | Admin | **feito** |
+| /notificacoes | GET | Notificações enviadas ao responsável | Visualizador | **feito** |
+| /janela | GET | Diz se estamos em horário de pico e qual a próxima janela | Visualizador | **feito** |
+| /relatorio | GET | Relatório consolidado, com quem autorizou o quê | Visualizador | **feito** |
+| /relatorio.csv | GET | O mesmo relatório para baixar e abrir no Excel | Visualizador | **feito** |
 | /ia/status | GET | Diz se a IA está configurada e qual modelo | Visualizador | **feito** |
+| /simulador/disco | POST | Liga ou desliga a falha de disco | Admin | **feito** |
+| /simulador/pico | POST | Finge horário de pico, para a demo | Admin | **feito** |
 | /simulador/falha | POST | Liga ou desliga a falha para a demo | Admin | **feito** |
 | /simulador/limpar | POST | Zera o histórico antes da demo | Admin | **feito** |
 
@@ -30,6 +38,7 @@ ou `admin`). Rotas que exigem mais permissão respondem **403**.
   "metricas": {
     "aplicacao_web": { "taxa_erros": 7.3 },
     "api_pagamentos": { "latencia_ms": 2028 },
+    "servidor_arquivos": { "uso_disco": 62.4 },
     "coletado_em": "2026-11-03T23:02:35.000Z"
   },
   "decisao": {

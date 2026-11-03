@@ -9,6 +9,7 @@ acontecendo**. Reserve cerca de metade do tempo da apresentação para ela.
 - [ ] Navegador aberto em `http://localhost:3000`
 - [ ] Clicar em "Limpar histórico" para a tela começar zerada
 - [ ] Perfil no seletor em **Admin**
+- [ ] "Simular horário de pico" desligado (clique em "Voltar ao normal")
 - [ ] Vídeo de reserva gravado, caso algo falhe ao vivo
 - [ ] Notificações do sistema desligadas
 
@@ -27,6 +28,32 @@ acontecendo**. Reserve cerca de metade do tempo da apresentação para ela.
 | 9 | Mostrar o painel normalizando | "A ação foi executada e o serviço voltou ao normal." |
 | 10 | Mostrar o histórico | "Duas linhas: a decisão do sistema e a decisão do humano. Evento, decisão, quem autorizou e resultado." |
 | 11 | Apontar os indicadores | "E o impacto para o negócio: eventos tratados e tempo manual poupado." |
+
+## Segunda parte: a janela de manutenção
+
+Este bloco mostra o quarto nível de autonomia e uma decisão de governança que
+poucos grupos têm: o sistema decide **quando** agir, não só **o quê**.
+
+| # | O que fazer | O que dizer |
+| --- | --- | --- |
+| 12 | Clicar em **Simular horário de pico** | "Agora são 10 da manhã, o sistema está cheio de usuários." |
+| 13 | Clicar em **Simular disco cheio** | "Aparece outro problema: o disco do servidor de arquivos está enchendo." |
+| 14 | Mostrar que nada foi pedido | "Este é um problema conhecido e de baixo risco. O sistema poderia resolver sozinho." |
+| 15 | Apontar "Agendado para a janela de manutenção" | "Mas ele não fez isso agora. Limpar arquivos em horário de pico atrapalharia os usuários, então a ação foi agendada para as 18h." |
+| 16 | Apontar a notificação | "E o responsável foi notificado do agendamento." |
+| 17 | Clicar em **Executar agora** | "Se for urgente, um administrador antecipa. E isso também fica registrado." |
+| 18 | Mostrar o histórico de novo | "Repare que o registro diz que foi uma antecipação manual, e quem fez." |
+
+Frase para fechar este bloco:
+
+> "Decidir o que fazer não basta: é preciso decidir quando fazer. Um sistema que
+> age na hora errada causa um problema em vez de resolver um."
+
+## Baixar o relatório
+
+No fim, clique em **Baixar relatório**. Abre um CSV com todo o histórico de
+decisões e quem autorizou cada uma. Serve para mostrar que a auditoria sai do
+sistema, não fica só na tela.
 
 ## O passo 7 é o mais importante
 

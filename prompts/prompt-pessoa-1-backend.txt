@@ -34,21 +34,27 @@ backend/gerador.js   gera as métricas simuladas das 2 fontes
 backend/banco.js     lê e grava o arquivo de dados
 logica/regras.js     regras de decisão e níveis de autonomia
 logica/ia.js         chama o modelo de IA, com fallback para as regras
+logica/janela.js     janela de manutenção e horário de pico
+logica/notificacoes.js  notifica o responsável
+testes/testes.js     bateria de 52 testes automatizados
 frontend/            index.html, estilo.css, app.js
 docs/                documentação técnica do MVP
 apresentacao/        roteiro da demo e perguntas da banca
 
 COMO O SISTEMA FUNCIONA HOJE
-Duas fontes simuladas: aplicação web (taxa de erros) e API de pagamentos (tempo
-de resposta). A cada 3 segundos o painel chama GET /status, o back-end gera uma
-leitura e as regras decidem o nível de autonomia:
+Três fontes simuladas: aplicação web (taxa de erros), API de pagamentos (tempo
+de resposta) e servidor de arquivos (uso do disco, fazendo o papel de sensor).
+A cada 3 segundos o painel chama GET /status, o back-end gera uma leitura e as
+regras decidem o nível de autonomia:
 - 1 sinal acima do limite          -> alertar
 - 1 sinal bem acima do limite      -> recomendar
 - os 2 sinais juntos (degradação)  -> pedir aprovação (humano autoriza)
-- falha conhecida de baixo risco   -> executar (ainda não implementado)
+- disco quase cheio (baixo risco)  -> executar, mas em horário de pico a ação
+                                      é AGENDADA para a janela de manutenção
 A IA escreve a recomendação em linguagem natural; se falhar ou não houver chave
 de API, usa-se o texto das regras. Tudo gera registro de auditoria com evento,
-decisão, quem autorizou e resultado.
+decisão, quem autorizou e resultado. Há 52 testes automatizados: rode
+"node testes/testes.js" antes e depois de mexer em qualquer coisa.
 
 PERFIS DE ACESSO
 visualizador (só vê), operador (aprova ou rejeita ações) e admin (tudo, mais
@@ -68,13 +74,15 @@ auditoria. As rotas já funcionam: /login, /status, /metricas, /eventos,
 /recomendacoes, /acoes/{id}/aprovar, /acoes/{id}/rejeitar, /auditoria,
 /indicadores, /ia/status, /simulador/falha e /simulador/limpar.
 
-O QUE PRECISO FAZER
-1. Acrescentar uma TERCEIRA fonte de dados, um sensor simulado (ex.: temperatura
-   do servidor), em backend/gerador.js, e fazer as regras considerarem ela.
-   Isso cobre a parte opcional de IoT do desafio.
-2. Avaliar trocar o arquivo JSON por SQLite, se der tempo, mantendo a camada
-   isolada em backend/banco.js.
-3. Garantir que o histórico não cresça sem limite.
+JÁ ESTÁ PRONTO NA MINHA PARTE
+A terceira fonte de dados (sensor de disco), a janela de manutenção, o
+agendador de ações, as notificações, o relatório em CSV e os 52 testes.
+
+O QUE AINDA POSSO FAZER
+1. Avaliar trocar o arquivo JSON por SQLite, mantendo a camada isolada em
+   backend/banco.js, se der tempo.
+2. Acrescentar mais ações automáticas de baixo risco além da limpeza de disco.
+3. Estudar o código a fundo, porque vou apresentar a arquitetura para a banca.
 
 COMECE ASSIM
 Me explique o que cada arquivo da pasta backend/ faz, em português simples,

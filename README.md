@@ -9,8 +9,17 @@ HTML, CSS e JavaScript no front-end.
 
 ## Cenário
 
-Uma aplicação web começa a ter muitos erros e, ao mesmo tempo, uma API fica lenta.
-O sistema correlaciona os dois sinais, identifica a degradação e define a resposta.
+São **dois cenários**, de propósito, porque cada um mostra um nível de
+autonomia diferente:
+
+1. **Risco alto** — a aplicação web começa a dar erro e, ao mesmo tempo, a API
+   fica lenta. O sistema correlaciona os sinais, identifica a degradação e
+   **pede aprovação** a um humano.
+2. **Risco baixo** — o disco do servidor de arquivos começa a encher. É um
+   problema conhecido e a solução não derruba nada, então o sistema **resolve
+   sozinho**. Mas, se estivermos em horário de pico, a ação é **agendada para a
+   janela de manutenção** em vez de rodar na hora.
+
 Os dados são **simulados**: o desafio pede demonstrar a decisão, não construir
 infraestrutura real.
 
@@ -83,10 +92,13 @@ Funciona com qualquer serviço compatível com o formato da OpenAI.
 
 ```
 backend/server.js    rotas da API e entrega do painel
-backend/gerador.js   gerador de dados simulados (2 fontes)
+backend/gerador.js   gerador de dados simulados (3 fontes)
 backend/banco.js     armazenamento em arquivo JSON
 logica/regras.js     regras de decisão e níveis de autonomia
 logica/ia.js         integração com modelo de IA (com fallback)
+logica/janela.js     janela de manutenção e horário de pico
+logica/notificacoes.js  notificação do responsável
+testes/testes.js     bateria de testes automatizados
 frontend/            painel: index.html, estilo.css, app.js
 docs/                documentação técnica do MVP
 apresentacao/        roteiro da demo, falas e perguntas da banca
@@ -107,19 +119,45 @@ apresentacao/        roteiro da demo, falas e perguntas da banca
 | --- | --- | --- |
 | Alertar | Um sinal acima do limite | Mostra alerta no painel |
 | Recomendar | Um sinal bem acima do limite | Sugere uma ação |
-| Pedir aprovação | Erros e lentidão juntos | Operador aprova ou rejeita |
-| Executar | Falha conhecida de baixo risco | Age sozinho (simulado) e registra |
+| Pedir aprovação | Erros e lentidão juntos | Notifica o responsável; operador aprova ou rejeita |
+| Executar | Disco quase cheio (baixo risco) | Age sozinho, ou agenda para a janela de manutenção |
 
 Toda decisão gera um registro com: **evento, decisão, quem autorizou, resultado**.
 
+## Janela de manutenção
+
+Decidir *o que* fazer não basta: é preciso decidir *quando*. Uma ação de baixo
+risco que o sistema executaria sozinho ainda assim atrapalha quem está usando o
+sistema durante o dia.
+
+Por isso, em **horário de pico (das 8h às 18h)**, ações de baixo risco são
+**agendadas** para a próxima janela de manutenção em vez de executadas na hora.
+Fora do pico, o sistema age imediatamente. Um administrador pode antecipar uma
+ação agendada a qualquer momento.
+
+O botão "Simular horário de pico" existe para demonstrar isso mesmo que a
+apresentação seja à noite.
+
+## Testes
+
+```bash
+node testes/testes.js
+```
+
+São 52 testes cobrindo todas as rotas, os perfis de acesso, o cenário completo,
+a janela de manutenção, as notificações e o relatório. Rode antes de cada
+entrega.
+
 ## O que ainda falta
 
-- [ ] Nível "executar" nas regras (Pessoa 2)
-- [ ] Conseguir uma chave de API para demonstrar a IA ligada (Pessoa 2)
 - [ ] Tela de login de verdade, hoje o perfil é escolhido no seletor (Pessoa 3)
 - [ ] Gráfico das métricas ao longo do tempo (Pessoa 3)
-- [ ] Diagrama de arquitetura e slides (Pessoa 3)
-- [ ] Terceira fonte de dados, como um sensor simulado (Pessoa 1)
+- [ ] Slides da apresentação (Pessoa 3)
+- [ ] Chave de API para demonstrar a IA ligada (Pessoa 2)
+- [ ] Revisar e justificar os limites das regras (Pessoa 2)
+
+Já prontos: as três fontes de dados, os quatro níveis de autonomia, a janela de
+manutenção, as notificações, o relatório de auditoria e o diagrama.
 
 ## Regras de trabalho
 

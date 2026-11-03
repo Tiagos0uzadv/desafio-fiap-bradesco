@@ -38,6 +38,21 @@ profundidade na sua parte.
 > valor gera sempre a mesma decisão, e conseguimos explicar o porquê. Com um
 > modelo, não teríamos essa garantia.
 
+## Sobre a janela de manutenção
+
+**Por que agendar em vez de executar na hora?**
+> Porque uma ação de baixo risco ainda assim consome recursos e pode afetar
+> quem está usando o sistema. Decidir o que fazer não basta: é preciso decidir
+> quando. Fora do horário de pico, a mesma ação é executada imediatamente.
+
+**E se o problema for urgente?**
+> Um administrador antecipa a ação com um clique, e a antecipação fica
+> registrada na auditoria com o nome de quem fez.
+
+**Como vocês definiram o horário de pico?**
+> Das 8h às 18h, que é o horário comercial. É uma configuração, fica em um
+> arquivo só e seria ajustada conforme o perfil de uso real da empresa.
+
 ## Sobre segurança e governança
 
 **Como garantem que alguém não execute uma ação indevida?**

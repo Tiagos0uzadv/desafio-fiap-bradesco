@@ -64,6 +64,16 @@ th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid #eee; 
 th { background: #f2f2f2; font-size: .8rem; text-transform: uppercase; color: #555; }
 
 .pendente { background: #fff; border: 1px solid #c8102e; border-radius: 8px; padding: .8rem; margin-bottom: .5rem; }
+.agendada { background: #fff; border: 1px solid #1a4fa0; border-radius: 8px; padding: .8rem; margin-bottom: .5rem; }
+.notificacao { padding: .4rem 0; border-bottom: 1px solid #eee; }
+.notificacao:last-child { border-bottom: none; }
+.executar { border-left: 6px solid #1a4fa0; }
+
+.botao-link { display: inline-block; padding: .5rem .9rem; border: 1px solid #555; color: #555;
+  border-radius: 6px; text-decoration: none; font-size: .9rem; }
+.botao-link:hover { background: #555; color: #fff; }
+
+header h1 { margin-bottom: .2rem; }
 
 .selo { font-size: .7rem; padding: .15rem .45rem; border-radius: 10px; margin-left: .4rem; vertical-align: middle; }
 .selo.ia { background: #e8f0fe; color: #1a4fa0; border: 1px solid #1a4fa0; }

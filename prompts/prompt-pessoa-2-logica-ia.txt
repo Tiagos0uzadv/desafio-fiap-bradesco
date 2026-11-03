@@ -34,21 +34,27 @@ backend/gerador.js   gera as métricas simuladas das 2 fontes
 backend/banco.js     lê e grava o arquivo de dados
 logica/regras.js     regras de decisão e níveis de autonomia
 logica/ia.js         chama o modelo de IA, com fallback para as regras
+logica/janela.js     janela de manutenção e horário de pico
+logica/notificacoes.js  notifica o responsável
+testes/testes.js     bateria de 52 testes automatizados
 frontend/            index.html, estilo.css, app.js
 docs/                documentação técnica do MVP
 apresentacao/        roteiro da demo e perguntas da banca
 
 COMO O SISTEMA FUNCIONA HOJE
-Duas fontes simuladas: aplicação web (taxa de erros) e API de pagamentos (tempo
-de resposta). A cada 3 segundos o painel chama GET /status, o back-end gera uma
-leitura e as regras decidem o nível de autonomia:
+Três fontes simuladas: aplicação web (taxa de erros), API de pagamentos (tempo
+de resposta) e servidor de arquivos (uso do disco, fazendo o papel de sensor).
+A cada 3 segundos o painel chama GET /status, o back-end gera uma leitura e as
+regras decidem o nível de autonomia:
 - 1 sinal acima do limite          -> alertar
 - 1 sinal bem acima do limite      -> recomendar
 - os 2 sinais juntos (degradação)  -> pedir aprovação (humano autoriza)
-- falha conhecida de baixo risco   -> executar (ainda não implementado)
+- disco quase cheio (baixo risco)  -> executar, mas em horário de pico a ação
+                                      é AGENDADA para a janela de manutenção
 A IA escreve a recomendação em linguagem natural; se falhar ou não houver chave
 de API, usa-se o texto das regras. Tudo gera registro de auditoria com evento,
-decisão, quem autorizou e resultado.
+decisão, quem autorizou e resultado. Há 52 testes automatizados: rode
+"node testes/testes.js" antes e depois de mexer em qualquer coisa.
 
 PERFIS DE ACESSO
 visualizador (só vê), operador (aprova ou rejeita ações) e admin (tudo, mais
@@ -68,18 +74,19 @@ integração com o modelo de IA. Os limites de hoje estão no topo de
 logica/regras.js: 3% de erros, 800 ms de latência, e os valores "muito altos"
 de 6% e 1500 ms.
 
-O QUE PRECISO FAZER
-1. Implementar o 4º nível, "executar", para uma falha conhecida de baixo risco
-   (por exemplo, uma fila travada): o sistema age sozinho e registra, sem pedir
-   aprovação. Hoje só existem alertar, recomendar e pedir aprovação.
-2. Conseguir uma chave de API para demonstrar a IA ligada de verdade. O código
+JÁ ESTÁ PRONTO NA MINHA PARTE
+Os quatro níveis de autonomia, incluindo o "executar" para disco quase cheio,
+e a janela de manutenção em logica/janela.js.
+
+O QUE AINDA PRECISO FAZER
+1. Conseguir uma chave de API para demonstrar a IA ligada de verdade. O código
    em logica/ia.js já está pronto e usa as variáveis IA_API_KEY, IA_URL e
    IA_MODELO, funcionando com qualquer serviço compatível com o formato da
    OpenAI. Sem chave, ele usa o texto das regras.
-3. Criar testes simples cobrindo os casos: normal, só erros, só lentidão, os
-   dois juntos, e a falha de baixo risco.
-4. Revisar se os limites fazem sentido e documentar por que escolhemos cada um,
+2. Revisar se os limites fazem sentido e documentar por que escolhemos cada um,
    porque a banca pode perguntar.
+3. Acrescentar mais casos à bateria de testes em testes/testes.js, conforme
+   formos criando regras novas.
 
 IMPORTANTE
 A IA NÃO decide o nível de autonomia: quem decide são as regras. A IA só
