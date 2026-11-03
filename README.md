@@ -85,8 +85,8 @@ Funciona com qualquer serviço compatível com o formato da OpenAI.
 | Pessoa | Parte | Arquivos | Branch |
 | --- | --- | --- | --- |
 | Tiago | Back-end: API, dados, auditoria | `backend/` | `back-end` |
-| [nome] | Lógica e IA: análise, regras, IA | `logica/` | `logica-ia` |
-| [nome] | Frontend e Negócio: painel, diagrama, slides | `frontend/`, `docs/` | `frontend` |
+| Felipe | Lógica e IA: análise, regras, IA | `logica/` | `logica-ia` |
+| Cauã | Frontend e Negócio: painel, login, slides | `frontend/`, `docs/` | `frontend` |
 
 ## Estrutura
 
@@ -102,6 +102,7 @@ testes/testes.js     bateria de testes automatizados
 frontend/            painel: index.html, estilo.css, app.js
 docs/                documentação técnica do MVP
 apresentacao/        roteiro da demo, falas e perguntas da banca
+postman/             coleção pronta para testar a API
 ```
 
 ## Documentação
@@ -112,6 +113,8 @@ apresentacao/        roteiro da demo, falas e perguntas da banca
   perguntas da banca e checklist de entrega
 - **[prompts/](prompts/)** — um prompt por pessoa, para começar já sabendo o
   estado do projeto
+- **[postman/](postman/)** — coleção com 33 requisições e um roteiro de 8
+  passos que percorre o cenário completo
 
 ## Níveis de autonomia
 

@@ -5,12 +5,12 @@ responde melhor às perguntas da banca.
 
 | # | Parte | Quem fala | Tempo sugerido |
 | --- | --- | --- | --- |
-| 1 | Problema e solução | Pessoa 3 (Frontend e Negócio) | 10% |
-| 2 | Arquitetura e módulos | Pessoa 1 (Back-end) | 15% |
-| 3 | Regras de decisão e IA | Pessoa 2 (Lógica e IA) | 15% |
+| 1 | Problema e solução | Cauã (Frontend e Negócio) | 10% |
+| 2 | Arquitetura e módulos | Tiago (Back-end) | 15% |
+| 3 | Regras de decisão e IA | Felipe (Lógica e IA) | 15% |
 | 4 | Demonstração ao vivo | Todos (ver abaixo) | 40% |
-| 5 | Resultados de negócio | Pessoa 3 | 10% |
-| 6 | Próximos passos | Pessoa 1 | 10% |
+| 5 | Resultados de negócio | Cauã | 10% |
+| 6 | Próximos passos | Tiago | 10% |
 
 ## Como dividir a demo
 
@@ -21,7 +21,7 @@ costuma dar errado.
 - **Pessoa 2** narra o que o sistema está decidindo e por quê
 - **Pessoa 3** narra o impacto para o negócio
 
-## Abertura (Pessoa 3)
+## Abertura (Cauã)
 
 > "Equipes de TI gastam boa parte do dia reagindo a falhas que seguem sempre o
 > mesmo padrão: alguém percebe, abre chamado, investiga e executa a mesma ação
@@ -40,7 +40,7 @@ costuma dar errado.
   sistema continua decidindo."
 - "Toda ação fica registrada: dá para auditar o que aconteceu e quem autorizou."
 
-## Fechamento (Pessoa 1)
+## Fechamento (Tiago)
 
 > "Os próximos passos seriam conectar o sistema a fontes reais em vez das
 > simuladas, incluir mais serviços e ampliar a biblioteca de ações automáticas,

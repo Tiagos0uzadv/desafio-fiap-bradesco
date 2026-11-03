@@ -45,10 +45,10 @@ Itens que não estavam no enunciado e diferenciam o projeto:
 
 | Item | Responsável |
 | --- | --- |
-| Chave de API para demonstrar a IA ligada | Pessoa 2 |
-| Tela de login de verdade (hoje o perfil vem de um seletor) | Pessoa 3 |
-| Gráfico das métricas ao longo do tempo | Pessoa 3 |
-| Slides da apresentação | Pessoa 3 |
+| Chave de API para demonstrar a IA ligada | Felipe |
+| Tela de login de verdade (hoje o perfil vem de um seletor) | Cauã |
+| Gráfico das métricas ao longo do tempo | Cauã |
+| Slides da apresentação | Cauã |
 
 ## Indicadores de negócio
 

@@ -1,0 +1,1188 @@
+{
+  "info": {
+    "name": "SentinelaOps — Desafio FIAP x Bradesco",
+    "description": "Coleção para testar a API do SentinelaOps.\n\nANTES DE COMEÇAR\n1. Suba o servidor: na pasta backend, rode `npm start`.\n2. Selecione o ambiente \"SentinelaOps - local\" no canto superior direito.\n3. A variável `perfil` controla quem você é: visualizador, operador ou admin.\n\nROTEIRO SUGERIDO (pasta \"0. Roteiro completo\")\nRode as requisições daquela pasta em ordem para ver o cenário inteiro: evento, decisão, bloqueio por perfil, aprovação e auditoria.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "perfil",
+      "value": "admin"
+    },
+    {
+      "key": "acaoId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Roteiro completo (rode em ordem)",
+      "description": "Os 8 passos do cenário evento -> decisão -> ação. Rode de cima para baixo.",
+      "item": [
+        {
+          "name": "1. Limpar historico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "admin",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/limpar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "limpar"
+              ]
+            },
+            "description": "Zera o histórico para começar do zero. Só admin.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('limpou', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Simular degradacao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "admin",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/falha",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "falha"
+              ]
+            },
+            "description": "Liga a falha: erros e lentidão ao mesmo tempo. Só admin.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ativa\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('falha ligada', () => pm.response.json().falha_simulada === true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Coletar status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status"
+              ]
+            },
+            "description": "Gera uma leitura e devolve a decisão. Rode 2 ou 3 vezes até o nível virar pedir_aprovacao."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = pm.response.json();",
+                  "console.log('nivel:', d.decisao.nivel);",
+                  "pm.test('trouxe as 3 fontes', () => {",
+                  "  pm.expect(d.metricas).to.have.property('aplicacao_web');",
+                  "  pm.expect(d.metricas).to.have.property('api_pagamentos');",
+                  "  pm.expect(d.metricas).to.have.property('servidor_arquivos');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Ver acoes pendentes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/recomendacoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recomendacoes"
+              ]
+            },
+            "description": "Lista as ações aguardando aprovação e guarda o id da primeira na variável acaoId."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const lista = pm.response.json();",
+                  "if (lista.length > 0) {",
+                  "  pm.collectionVariables.set('acaoId', lista[0].id);",
+                  "  console.log('acaoId guardado:', lista[0].id);",
+                  "} else {",
+                  "  console.log('nenhuma acao pendente: rode o passo 3 mais vezes');",
+                  "}",
+                  "pm.test('existe acao pendente', () => pm.expect(lista.length).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Visualizador tenta aprovar (deve dar 403)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "visualizador",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/acoes/{{acaoId}}/aprovar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "acoes",
+                "{{acaoId}}",
+                "aprovar"
+              ]
+            },
+            "description": "A prova do controle de acesso: visualizador não pode aprovar.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('bloqueado com 403', () => pm.response.to.have.status(403));",
+                  "console.log(pm.response.json().detalhe);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6. Operador aprova",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "operador",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/acoes/{{acaoId}}/aprovar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "acoes",
+                "{{acaoId}}",
+                "aprovar"
+              ]
+            },
+            "description": "O operador tem permissão: a ação é executada e o serviço normaliza.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('aprovado', () => pm.response.to.have.status(200));",
+                  "const a = pm.response.json();",
+                  "pm.test('ficou executada', () => pm.expect(a.status).to.eql('executada'));",
+                  "pm.test('registrou quem autorizou', () => pm.expect(a.autorizado_por).to.eql('operador'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7. Ver auditoria",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auditoria",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auditoria"
+              ]
+            },
+            "description": "Deve ter 2 linhas: a decisão do sistema e a do operador."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const linhas = pm.response.json();",
+                  "pm.test('tem os 4 campos exigidos', () => {",
+                  "  pm.expect(linhas[0]).to.have.property('evento');",
+                  "  pm.expect(linhas[0]).to.have.property('decisao');",
+                  "  pm.expect(linhas[0]).to.have.property('autorizado_por');",
+                  "  pm.expect(linhas[0]).to.have.property('resultado');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8. Ver indicadores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/indicadores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "indicadores"
+              ]
+            },
+            "description": "Os números de negócio depois da ação executada."
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Monitoramento",
+      "item": [
+        {
+          "name": "Status atual",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status"
+              ]
+            },
+            "description": "Gera uma leitura das 3 fontes e devolve a decisão."
+          }
+        },
+        {
+          "name": "Historico de metricas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/metricas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metricas"
+              ]
+            },
+            "description": "Últimas 50 leituras."
+          }
+        },
+        {
+          "name": "Eventos detectados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "eventos"
+              ]
+            },
+            "description": "Eventos que o sistema identificou."
+          }
+        },
+        {
+          "name": "Janela de manutencao",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/janela",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "janela"
+              ]
+            },
+            "description": "Diz se estamos em horário de pico e qual a próxima janela."
+          }
+        },
+        {
+          "name": "Status da IA",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ia/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ia",
+                "status"
+              ]
+            },
+            "description": "Mostra se há chave de API configurada."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Identidade e acesso",
+      "item": [
+        {
+          "name": "Login valido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Usuários: ana/123 (visualizador), bruno/123 (operador), tiago/123 (admin).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": \"bruno\",\n  \"senha\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('devolve o perfil', () => pm.expect(pm.response.json().perfil).to.eql('operador'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login invalido (deve dar 401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Senha errada.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": \"bruno\",\n  \"senha\": \"errada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('recusa com 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Acoes",
+      "item": [
+        {
+          "name": "Aguardando aprovacao",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/recomendacoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recomendacoes"
+              ]
+            },
+            "description": "Ações que esperam decisão humana."
+          }
+        },
+        {
+          "name": "Agendadas para a janela",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/agendadas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "agendadas"
+              ]
+            },
+            "description": "Ações de baixo risco adiadas para fora do pico."
+          }
+        },
+        {
+          "name": "Aprovar acao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "operador",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/acoes/{{acaoId}}/aprovar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "acoes",
+                "{{acaoId}}",
+                "aprovar"
+              ]
+            },
+            "description": "Exige perfil operador ou admin.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Rejeitar acao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "operador",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/acoes/{{acaoId}}/rejeitar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "acoes",
+                "{{acaoId}}",
+                "rejeitar"
+              ]
+            },
+            "description": "Exige perfil operador ou admin.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"vamos investigar antes\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Executar agendada agora",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "admin",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/acoes/{{acaoId}}/executar-agora",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "acoes",
+                "{{acaoId}}",
+                "executar-agora"
+              ]
+            },
+            "description": "Antecipa a janela de manutenção. Só admin.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Auditoria e relatorios",
+      "item": [
+        {
+          "name": "Auditoria completa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auditoria",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auditoria"
+              ]
+            },
+            "description": "Evento, decisão, quem autorizou e resultado."
+          }
+        },
+        {
+          "name": "Indicadores de negocio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/indicadores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "indicadores"
+              ]
+            },
+            "description": "Eventos, ações e minutos poupados."
+          }
+        },
+        {
+          "name": "Notificacoes enviadas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notificacoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notificacoes"
+              ]
+            },
+            "description": "O que foi avisado ao responsável."
+          }
+        },
+        {
+          "name": "Relatorio consolidado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/relatorio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorio"
+              ]
+            },
+            "description": "Resumo por quem autorizou."
+          }
+        },
+        {
+          "name": "Relatorio em CSV",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "{{perfil}}",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/relatorio.csv",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorio.csv"
+              ]
+            },
+            "description": "Baixa o arquivo para abrir no Excel."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Simulador (so admin)",
+      "item": [
+        {
+          "name": "Ligar degradacao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "admin",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/falha",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "falha"
+              ]
+            },
+            "description": "Erros e lentidão juntos: risco alto.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ativa\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Desligar degradacao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "admin",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/falha",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "falha"
+              ]
+            },
+            "description": "Volta ao normal.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ativa\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ligar disco cheio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "admin",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/disco",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "disco"
+              ]
+            },
+            "description": "Disco quase cheio: risco baixo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ativa\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Desligar disco cheio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "admin",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/disco",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "disco"
+              ]
+            },
+            "description": "Volta ao normal.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ativa\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Fingir horario de pico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "admin",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/pico",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "pico"
+              ]
+            },
+            "description": "Para demonstrar o agendamento mesmo à noite.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ativa\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Sair do horario de pico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "admin",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/pico",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "pico"
+              ]
+            },
+            "description": "Volta ao horário real.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ativa\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Limpar historico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "admin",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/limpar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "limpar"
+              ]
+            },
+            "description": "Zera tudo para a demo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Operador tenta simular (deve dar 403)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-perfil",
+                "value": "operador",
+                "description": "Perfil de acesso: visualizador, operador ou admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/falha",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "falha"
+              ]
+            },
+            "description": "Prova que só admin pode simular.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ativa\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('bloqueado com 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
