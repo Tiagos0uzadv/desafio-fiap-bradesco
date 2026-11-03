@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SentinelaOps</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .nenhum { background: #e8f5e9; } .alertar { background: #fff8e1; }
+    .recomendar { background: #fff3e0; } .pedir_aprovacao { background: #ffebee; }
+    button { padding: .5rem 1rem; margin-right: .5rem; }
+  </style>
+</head>
+<body>
+  <!-- Pessoa 3: esta é só uma página de teste. Substituir pelo dashboard final. -->
+  <h1>SentinelaOps</h1>
+  <button onclick="falha(true)">Simular problema</button>
+  <button onclick="falha(false)">Voltar ao normal</button>
+
+  <div id="decisao" class="card">Carregando...</div>
+  <div id="metricas" class="card"></div>
+
+  <script>
+    const API = "http://127.0.0.1:8000";
+
+    async function atualizar() {
+      try {
+        const r = await fetch(API + "/status");
+        const d = await r.json();
+        document.getElementById("decisao").className = "card " + d.decisao.nivel;
+        document.getElementById("decisao").innerHTML =
+          "<strong>Nível: " + d.decisao.nivel + "</strong><br>" +
+          d.decisao.recomendacao + "<br><small>" + d.decisao.detalhe + "</small>";
+        document.getElementById("metricas").innerHTML =
+          "Erros da aplicação: " + d.metricas.aplicacao_web.taxa_erros + "%<br>" +
+          "Latência da API: " + d.metricas.api_pagamentos.latencia_ms + " ms";
+      } catch (e) {
+        document.getElementById("decisao").textContent = "API fora do ar. Rode o uvicorn.";
+      }
+    }
+
+    async function falha(ativa) {
+      await fetch(API + "/simulador/falha?ativa=" + ativa, { method: "POST" });
+      atualizar();
+    }
+
+    atualizar();
+    setInterval(atualizar, 3000);
+  </script>
+</body>
+</html>
