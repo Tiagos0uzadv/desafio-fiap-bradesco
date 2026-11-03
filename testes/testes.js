@@ -45,6 +45,20 @@ async function api(rota, { metodo = 'GET', perfil = 'admin', corpo } = {}) {
   return { status: resposta.status, dados };
 }
 
+// Espera o servidor responder. Em maquinas mais lentas (ou com antivirus
+// inspecionando o Node) ele pode demorar alguns segundos para subir.
+async function esperarServidor(tentativas = 30) {
+  for (let i = 0; i < tentativas; i++) {
+    try {
+      await fetch(BASE + '/');
+      return true;
+    } catch {
+      await esperar(500);
+    }
+  }
+  return false;
+}
+
 // Fica chamando /status ate o nivel desejado aparecer (ou desistir).
 async function esperarNivel(nivel, tentativas = 15) {
   for (let i = 0; i < tentativas; i++) {
@@ -250,7 +264,13 @@ async function rodarTestes() {
   const erros = [];
   servidor.stderr.on('data', (d) => erros.push(d.toString()));
 
-  await esperar(1500);
+  const noAr = await esperarServidor();
+  if (!noAr) {
+    console.log('\nO servidor nao subiu. Veja o erro abaixo:');
+    console.log(erros.join('') || '(sem mensagem de erro)');
+    servidor.kill();
+    process.exit(1);
+  }
 
   try {
     await rodarTestes();
