@@ -17,6 +17,16 @@ app = FastAPI(title="SentinelaOps")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
+@app.get("/")
+def raiz():
+    """Página inicial da API: só indica onde estão as rotas."""
+    return {
+        "projeto": "SentinelaOps",
+        "documentacao": "http://127.0.0.1:8000/docs",
+        "rotas": ["/status", "/simulador/falha"],
+    }
+
+
 @app.get("/status")
 def status():
     """Leitura atual das fontes + a decisão da lógica."""
