@@ -19,6 +19,7 @@ ou `admin`). Rotas que exigem mais permissão respondem **403**.
 | /acoes/{id}/rejeitar | POST | Rejeita a ação e registra o motivo | Operador | **feito** |
 | /auditoria | GET | Evento, decisão, quem autorizou, resultado | Visualizador | **feito** |
 | /indicadores | GET | Números de negócio | Visualizador | **feito** |
+| /ia/status | GET | Diz se a IA está configurada e qual modelo | Visualizador | **feito** |
 | /simulador/falha | POST | Liga ou desliga a falha para a demo | Admin | **feito** |
 | /simulador/limpar | POST | Zera o histórico antes da demo | Admin | **feito** |
 
@@ -35,7 +36,8 @@ ou `admin`). Rotas que exigem mais permissão respondem **403**.
     "nivel": "pedir_aprovacao",
     "evento": "degradacao",
     "recomendacao": "Reiniciar o servico api_pagamentos",
-    "detalhe": "erros 7.3% (limite 3%) e latencia 2028 ms (limite 800 ms)"
+    "detalhe": "erros 7.3% (limite 3%) e latencia 2028 ms (limite 800 ms)",
+    "origem_recomendacao": "ia"
   },
   "falha_simulada": true
 }

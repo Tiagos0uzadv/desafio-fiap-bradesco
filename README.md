@@ -45,6 +45,32 @@ No painel, o seletor "Perfil" no canto superior direito troca a permissão.
 Como **visualizador**, clicar em Aprovar é bloqueado pela API — é assim que
 demonstramos o requisito de identidade e acesso.
 
+## Inteligência artificial
+
+As **regras** (`logica/regras.js`) decidem o nível de autonomia. A **IA**
+(`logica/ia.js`) só escreve a recomendação em linguagem natural para o operador.
+Essa separação é proposital: se a IA errar ou cair, o sistema continua decidindo.
+
+Sem chave de API o projeto funciona normalmente, usando o texto das regras.
+O painel mostra em qual modo está e o selo diz se cada recomendação veio da IA
+ou das regras.
+
+Para ligar um modelo de verdade, defina as variáveis de ambiente antes de iniciar:
+
+```powershell
+$env:IA_API_KEY = "sua-chave-aqui"
+npm start
+```
+
+| Variável | Para que serve | Padrão |
+| --- | --- | --- |
+| IA_API_KEY | Chave da API. Sem ela, a IA fica desligada | — |
+| IA_URL | Endereço do modelo | API da OpenAI |
+| IA_MODELO | Nome do modelo | gpt-4o-mini |
+
+Funciona com qualquer serviço compatível com o formato da OpenAI.
+**Nunca** coloque a chave dentro do código: ela iria parar no GitHub.
+
 ## Divisão do grupo
 
 | Pessoa | Parte | Arquivos | Branch |
@@ -78,7 +104,7 @@ Toda decisão gera um registro com: **evento, decisão, quem autorizou, resultad
 ## O que ainda falta
 
 - [ ] Nível "executar" nas regras (Pessoa 2)
-- [ ] Integração com modelo de IA para escrever a recomendação (Pessoa 2)
+- [ ] Conseguir uma chave de API para demonstrar a IA ligada (Pessoa 2)
 - [ ] Tela de login de verdade, hoje o perfil é escolhido no seletor (Pessoa 3)
 - [ ] Gráfico das métricas ao longo do tempo (Pessoa 3)
 - [ ] Diagrama de arquitetura e slides (Pessoa 3)

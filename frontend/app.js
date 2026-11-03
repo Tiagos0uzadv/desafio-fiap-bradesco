@@ -16,6 +16,15 @@ function pedir(rota, opcoes = {}) {
   });
 }
 
+// Mostra de onde veio a recomendacao: do modelo de IA ou das regras.
+// O desafio pede demonstrar a IA quando ela e usada.
+function selo(origem) {
+  if (!origem) return '';
+  return origem === 'ia'
+    ? '<span class="selo ia">escrito pela IA</span>'
+    : '<span class="selo regras">gerado pelas regras</span>';
+}
+
 function cor(valor, limite, muito) {
   if (valor > muito) return 'vermelho';
   if (valor > limite) return 'amarelo';
@@ -31,7 +40,7 @@ async function atualizar() {
     caixa.className = 'card ' + decisao.nivel;
     caixa.innerHTML =
       `<div class="nivel">${decisao.nivel.replace('_', ' ')}</div>` +
-      `<div>${decisao.recomendacao}</div>` +
+      `<div>${decisao.recomendacao} ${selo(decisao.origem_recomendacao)}</div>` +
       `<div class="detalhe">${decisao.detalhe}</div>`;
 
     const erros = metricas.aplicacao_web.taxa_erros;
@@ -40,7 +49,7 @@ async function atualizar() {
       `<div><span class="bolinha ${cor(erros, 3, 6)}"></span>Aplicação web &mdash; erros: <strong>${erros}%</strong></div>` +
       `<div><span class="bolinha ${cor(latencia, 800, 1500)}"></span>API de pagamentos &mdash; latência: <strong>${latencia} ms</strong></div>`;
 
-    await Promise.all([carregarPendentes(), carregarIndicadores(), carregarAuditoria()]);
+    await Promise.all([carregarPendentes(), carregarIndicadores(), carregarAuditoria(), carregarIa()]);
   } catch (e) {
     document.getElementById('status').textContent = 'Servidor fora do ar. Rode "npm start" na pasta backend.';
   }
@@ -87,6 +96,14 @@ async function carregarIndicadores() {
     `<div>Ações executadas: <strong>${i.acoes_executadas}</strong></div>` +
     `<div>Ações automáticas: <strong>${i.acoes_automaticas}</strong></div>` +
     `<div>Minutos poupados: <strong>${i.minutos_poupados}</strong></div>`;
+}
+
+async function carregarIa() {
+  const i = await (await pedir('/ia/status')).json();
+  document.getElementById('ia').innerHTML =
+    `<div><strong>${i.ia_configurada ? 'IA ativa' : 'IA em modo regras'}</strong>` +
+    (i.modelo ? ` &mdash; ${i.modelo}` : '') + '</div>' +
+    `<div class="detalhe">${i.observacao}</div>`;
 }
 
 async function carregarAuditoria() {

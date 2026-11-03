@@ -13,6 +13,7 @@ const path = require('path');
 
 const { ativarFalha, falhaAtiva, gerarMetricas } = require('./gerador');
 const { decidir } = require('../logica/regras');
+const { gerarRecomendacao, iaLigada } = require('../logica/ia');
 const banco = require('./banco');
 
 const app = express();
@@ -69,8 +70,12 @@ function registrarAuditoria(evento, decisao, autorizadoPor, resultado) {
 // de linhas repetidas a cada 3 segundos.
 
 let ultimoNivel = 'nenhum';
+// Guardamos a ultima recomendacao para reaproveitar enquanto o nivel nao muda.
+// Sem isso, chamariamos a IA a cada 3 segundos e o texto ficaria piscando na tela.
+let ultimaRecomendacao = null;
+let ultimaOrigem = null;
 
-function coletar() {
+async function coletar() {
   const d = banco.carregar();
   const metricas = gerarMetricas();
   const decisao = decidir(
@@ -82,12 +87,21 @@ function coletar() {
   d.metricas = d.metricas.slice(0, 50); // guarda so as ultimas 50 leituras
 
   if (decisao.nivel !== ultimoNivel && decisao.nivel !== 'nenhum') {
+    // A IA escreve a recomendacao em linguagem natural. Se ela falhar
+    // ou nao estiver configurada, o texto das regras e usado no lugar.
+    const sugestao = await gerarRecomendacao(decisao, metricas);
+    decisao.recomendacao = sugestao.texto;
+    decisao.origem_recomendacao = sugestao.origem;
+    ultimaRecomendacao = sugestao.texto;
+    ultimaOrigem = sugestao.origem;
+
     const evento = {
       id: banco.novoId(),
       tipo: decisao.evento,
       nivel_autonomia: decisao.nivel,
       detalhe: decisao.detalhe,
       recomendacao: decisao.recomendacao,
+      origem_recomendacao: sugestao.origem,
       criado_em: new Date().toISOString(),
     };
     d.eventos.unshift(evento);
@@ -118,6 +132,16 @@ function coletar() {
     } else {
       registrarAuditoria(evento.tipo, decisao.nivel, 'sistema', 'alerta exibido no painel');
     }
+
+  } else if (decisao.nivel !== 'nenhum' && ultimaRecomendacao) {
+    // Mesmo nivel de antes: mantem o texto ja escrito, sem chamar a IA de novo.
+    decisao.recomendacao = ultimaRecomendacao;
+    decisao.origem_recomendacao = ultimaOrigem;
+  }
+
+  if (decisao.nivel === 'nenhum') {
+    ultimaRecomendacao = null;
+    ultimaOrigem = null;
   }
 
   ultimoNivel = decisao.nivel;
@@ -136,7 +160,7 @@ app.post('/login', (req, res) => {
 });
 
 // Leitura atual das fontes + a decisao da logica.
-app.get('/status', (req, res) => res.json(coletar()));
+app.get('/status', async (req, res) => res.json(await coletar()));
 
 app.get('/metricas', (req, res) => res.json(banco.carregar().metricas));
 
@@ -181,6 +205,17 @@ app.post('/acoes/:id/rejeitar', exigirPerfil('operador'), (req, res) => {
   registrarAuditoria('degradacao', 'rejeitar', req.perfil, acao.resultado);
   banco.salvar();
   res.json(acao);
+});
+
+// Mostra se a integracao com IA esta ligada (requisito: demonstrar quando usada).
+app.get('/ia/status', (req, res) => {
+  res.json({
+    ia_configurada: iaLigada(),
+    modelo: iaLigada() ? process.env.IA_MODELO || 'gpt-4o-mini' : null,
+    observacao: iaLigada()
+      ? 'As recomendacoes sao escritas pelo modelo; se ele falhar, as regras assumem.'
+      : 'Sem chave de API configurada: as recomendacoes vem das regras.',
+  });
 });
 
 app.get('/auditoria', (req, res) => res.json(banco.carregar().auditoria));

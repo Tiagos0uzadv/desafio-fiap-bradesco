@@ -64,3 +64,7 @@ th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid #eee; 
 th { background: #f2f2f2; font-size: .8rem; text-transform: uppercase; color: #555; }
 
 .pendente { background: #fff; border: 1px solid #c8102e; border-radius: 8px; padding: .8rem; margin-bottom: .5rem; }
+
+.selo { font-size: .7rem; padding: .15rem .45rem; border-radius: 10px; margin-left: .4rem; vertical-align: middle; }
+.selo.ia { background: #e8f0fe; color: #1a4fa0; border: 1px solid #1a4fa0; }
+.selo.regras { background: #f2f2f2; color: #666; border: 1px solid #ccc; }
