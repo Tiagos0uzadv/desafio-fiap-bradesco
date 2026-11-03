@@ -98,6 +98,8 @@ apresentacao/        roteiro da demo, falas e perguntas da banca
   completo e contrato da API
 - **[apresentacao/](apresentacao/)** — roteiro da demo, divisão das falas,
   perguntas da banca e checklist de entrega
+- **[prompts/](prompts/)** — um prompt por pessoa, para começar já sabendo o
+  estado do projeto
 
 ## Níveis de autonomia
 

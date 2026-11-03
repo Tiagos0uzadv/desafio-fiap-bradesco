@@ -1,0 +1,92 @@
+Sou aluno do 1º semestre de Engenharia de Software da FIAP e estou em um grupo
+de 3 pessoas no Desafio FIAP x Bradesco "Ambiente Inteligente e Autônomo".
+Tenho pouca experiência: explique cada passo de forma simples e me ensine
+enquanto construímos. Comente o código em português, porque preciso conseguir
+explicar tudo para a banca.
+
+O QUE O DESAFIO PEDE
+Um MVP web que monitora componentes de um ambiente, identifica situações de
+risco ou comportamento fora do padrão e recomenda ou executa ações
+automaticamente, com segurança, governança e intervenção humana quando
+necessária. O objetivo não é automatizar tudo: é definir até onde o sistema
+pode ir sozinho.
+
+Requisitos: dashboard web; regras que definem a resposta; arquitetura modular
+(monitoramento, análise, decisão, execução, identidade, auditoria); pelo menos
+2 fontes de dados; perfis de acesso diferentes; ganhos de negócio; 1 cenário
+completo evento -> decisão -> ação; registro de evento, decisão, quem autorizou
+e resultado; integração com modelo de IA.
+
+O PROJETO JÁ EXISTE E ESTÁ FUNCIONANDO
+Repositório: https://github.com/Tiagos0uzadv/desafio-fiap-bradesco
+NÃO comece do zero e NÃO reescreva o que já está pronto. Leia o README.md e a
+pasta docs/ antes de propor qualquer coisa.
+
+Nome: SentinelaOps. Tudo em JavaScript.
+- Back-end: Node.js + Express (pasta backend/)
+- Front-end: HTML, CSS e JavaScript puro (pasta frontend/)
+- Dados: arquivo JSON (backend/banco.js)
+- Rodar: cd backend, npm install, npm start, depois abrir http://localhost:3000
+
+ESTRUTURA DOS ARQUIVOS
+backend/server.js    rotas da API, execução das ações, verificação de perfil
+backend/gerador.js   gera as métricas simuladas das 2 fontes
+backend/banco.js     lê e grava o arquivo de dados
+logica/regras.js     regras de decisão e níveis de autonomia
+logica/ia.js         chama o modelo de IA, com fallback para as regras
+frontend/            index.html, estilo.css, app.js
+docs/                documentação técnica do MVP
+apresentacao/        roteiro da demo e perguntas da banca
+
+COMO O SISTEMA FUNCIONA HOJE
+Duas fontes simuladas: aplicação web (taxa de erros) e API de pagamentos (tempo
+de resposta). A cada 3 segundos o painel chama GET /status, o back-end gera uma
+leitura e as regras decidem o nível de autonomia:
+- 1 sinal acima do limite          -> alertar
+- 1 sinal bem acima do limite      -> recomendar
+- os 2 sinais juntos (degradação)  -> pedir aprovação (humano autoriza)
+- falha conhecida de baixo risco   -> executar (ainda não implementado)
+A IA escreve a recomendação em linguagem natural; se falhar ou não houver chave
+de API, usa-se o texto das regras. Tudo gera registro de auditoria com evento,
+decisão, quem autorizou e resultado.
+
+PERFIS DE ACESSO
+visualizador (só vê), operador (aprova ou rejeita ações) e admin (tudo, mais
+simular falha). O frontend manda o perfil no cabeçalho x-perfil e o servidor
+verifica em cada pedido, devolvendo 403 para quem não pode.
+
+REGRAS DE TRABALHO DO GRUPO
+- Cada um na sua branch, e junta na principal por pull request.
+- Antes de mudar uma rota ou o formato do JSON: avisar o grupo e atualizar
+  docs/contrato-api.md.
+- Nunca colocar chave de API dentro do código.
+
+=== MINHA PARTE: LÓGICA DE DECISÃO E IA ===
+
+Sou responsável por logica/: as regras que decidem o nível de autonomia e a
+integração com o modelo de IA. Os limites de hoje estão no topo de
+logica/regras.js: 3% de erros, 800 ms de latência, e os valores "muito altos"
+de 6% e 1500 ms.
+
+O QUE PRECISO FAZER
+1. Implementar o 4º nível, "executar", para uma falha conhecida de baixo risco
+   (por exemplo, uma fila travada): o sistema age sozinho e registra, sem pedir
+   aprovação. Hoje só existem alertar, recomendar e pedir aprovação.
+2. Conseguir uma chave de API para demonstrar a IA ligada de verdade. O código
+   em logica/ia.js já está pronto e usa as variáveis IA_API_KEY, IA_URL e
+   IA_MODELO, funcionando com qualquer serviço compatível com o formato da
+   OpenAI. Sem chave, ele usa o texto das regras.
+3. Criar testes simples cobrindo os casos: normal, só erros, só lentidão, os
+   dois juntos, e a falha de baixo risco.
+4. Revisar se os limites fazem sentido e documentar por que escolhemos cada um,
+   porque a banca pode perguntar.
+
+IMPORTANTE
+A IA NÃO decide o nível de autonomia: quem decide são as regras. A IA só
+escreve a recomendação para o operador ler. Essa separação é proposital e é a
+resposta para a pergunta "e se a IA errar?". Não mude isso.
+
+COMECE ASSIM
+Me explique como logica/regras.js e logica/ia.js funcionam hoje, em português
+simples, antes de alterarmos qualquer coisa. Depois vamos implementar o nível
+"executar", um passo por vez.

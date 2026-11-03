@@ -1,0 +1,82 @@
+Sou aluno do 1º semestre de Engenharia de Software da FIAP e estou em um grupo
+de 3 pessoas no Desafio FIAP x Bradesco "Ambiente Inteligente e Autônomo".
+Tenho pouca experiência: explique cada passo de forma simples e me ensine
+enquanto construímos. Comente o código em português, porque preciso conseguir
+explicar tudo para a banca.
+
+O QUE O DESAFIO PEDE
+Um MVP web que monitora componentes de um ambiente, identifica situações de
+risco ou comportamento fora do padrão e recomenda ou executa ações
+automaticamente, com segurança, governança e intervenção humana quando
+necessária. O objetivo não é automatizar tudo: é definir até onde o sistema
+pode ir sozinho.
+
+Requisitos: dashboard web; regras que definem a resposta; arquitetura modular
+(monitoramento, análise, decisão, execução, identidade, auditoria); pelo menos
+2 fontes de dados; perfis de acesso diferentes; ganhos de negócio; 1 cenário
+completo evento -> decisão -> ação; registro de evento, decisão, quem autorizou
+e resultado; integração com modelo de IA.
+
+O PROJETO JÁ EXISTE E ESTÁ FUNCIONANDO
+Repositório: https://github.com/Tiagos0uzadv/desafio-fiap-bradesco
+NÃO comece do zero e NÃO reescreva o que já está pronto. Leia o README.md e a
+pasta docs/ antes de propor qualquer coisa.
+
+Nome: SentinelaOps. Tudo em JavaScript.
+- Back-end: Node.js + Express (pasta backend/)
+- Front-end: HTML, CSS e JavaScript puro (pasta frontend/)
+- Dados: arquivo JSON (backend/banco.js)
+- Rodar: cd backend, npm install, npm start, depois abrir http://localhost:3000
+
+ESTRUTURA DOS ARQUIVOS
+backend/server.js    rotas da API, execução das ações, verificação de perfil
+backend/gerador.js   gera as métricas simuladas das 2 fontes
+backend/banco.js     lê e grava o arquivo de dados
+logica/regras.js     regras de decisão e níveis de autonomia
+logica/ia.js         chama o modelo de IA, com fallback para as regras
+frontend/            index.html, estilo.css, app.js
+docs/                documentação técnica do MVP
+apresentacao/        roteiro da demo e perguntas da banca
+
+COMO O SISTEMA FUNCIONA HOJE
+Duas fontes simuladas: aplicação web (taxa de erros) e API de pagamentos (tempo
+de resposta). A cada 3 segundos o painel chama GET /status, o back-end gera uma
+leitura e as regras decidem o nível de autonomia:
+- 1 sinal acima do limite          -> alertar
+- 1 sinal bem acima do limite      -> recomendar
+- os 2 sinais juntos (degradação)  -> pedir aprovação (humano autoriza)
+- falha conhecida de baixo risco   -> executar (ainda não implementado)
+A IA escreve a recomendação em linguagem natural; se falhar ou não houver chave
+de API, usa-se o texto das regras. Tudo gera registro de auditoria com evento,
+decisão, quem autorizou e resultado.
+
+PERFIS DE ACESSO
+visualizador (só vê), operador (aprova ou rejeita ações) e admin (tudo, mais
+simular falha). O frontend manda o perfil no cabeçalho x-perfil e o servidor
+verifica em cada pedido, devolvendo 403 para quem não pode.
+
+REGRAS DE TRABALHO DO GRUPO
+- Cada um na sua branch, e junta na principal por pull request.
+- Antes de mudar uma rota ou o formato do JSON: avisar o grupo e atualizar
+  docs/contrato-api.md.
+- Nunca colocar chave de API dentro do código.
+
+=== MINHA PARTE: BACK-END ===
+
+Sou responsável por backend/: a API, os dados, a execução das ações e a
+auditoria. As rotas já funcionam: /login, /status, /metricas, /eventos,
+/recomendacoes, /acoes/{id}/aprovar, /acoes/{id}/rejeitar, /auditoria,
+/indicadores, /ia/status, /simulador/falha e /simulador/limpar.
+
+O QUE PRECISO FAZER
+1. Acrescentar uma TERCEIRA fonte de dados, um sensor simulado (ex.: temperatura
+   do servidor), em backend/gerador.js, e fazer as regras considerarem ela.
+   Isso cobre a parte opcional de IoT do desafio.
+2. Avaliar trocar o arquivo JSON por SQLite, se der tempo, mantendo a camada
+   isolada em backend/banco.js.
+3. Garantir que o histórico não cresça sem limite.
+
+COMECE ASSIM
+Me explique o que cada arquivo da pasta backend/ faz, em português simples,
+antes de alterarmos qualquer coisa. Depois vamos um passo por vez, e ao fim de
+cada etapa me diga como testar (no navegador e no Postman).

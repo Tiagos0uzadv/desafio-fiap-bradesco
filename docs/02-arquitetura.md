@@ -6,6 +6,10 @@ isso é o que permite trocar uma parte sem quebrar as outras.
 
 ## Diagrama
 
+![Fluxo da solução](fluxograma.png)
+
+O mesmo fluxo, em detalhe:
+
 ```mermaid
 flowchart TB
     subgraph fontes["Fontes simuladas"]
