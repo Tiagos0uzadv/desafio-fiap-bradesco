@@ -1,0 +1,66 @@
+/* Estilo provisório (Pessoa 3 melhora) */
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: #1a1a1a;
+  background: #fafafa;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #c8102e;
+  padding-bottom: .75rem;
+}
+
+h1 { margin: 0; font-size: 1.5rem; }
+h2 { font-size: 1rem; margin: 1.5rem 0 .5rem; text-transform: uppercase; letter-spacing: .04em; color: #555; }
+
+.card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.colunas { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+
+button {
+  padding: .5rem .9rem;
+  margin-right: .4rem;
+  border: 1px solid #c8102e;
+  background: #fff;
+  color: #c8102e;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: .9rem;
+}
+button:hover { background: #c8102e; color: #fff; }
+button.aprovar { border-color: #1b7a3d; color: #1b7a3d; }
+button.aprovar:hover { background: #1b7a3d; color: #fff; }
+
+.acoes-admin { margin: 1rem 0; }
+
+/* Cores por nível de autonomia */
+.nenhum { border-left: 6px solid #1b7a3d; }
+.alertar { border-left: 6px solid #e5a000; }
+.recomendar { border-left: 6px solid #e56b00; }
+.pedir_aprovacao { border-left: 6px solid #c8102e; }
+
+.nivel { font-weight: 700; text-transform: uppercase; font-size: .8rem; letter-spacing: .05em; }
+.detalhe { color: #666; font-size: .85rem; }
+
+.bolinha { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: .5rem; }
+.verde { background: #1b7a3d; } .amarelo { background: #e5a000; } .vermelho { background: #c8102e; }
+
+table { width: 100%; border-collapse: collapse; background: #fff; font-size: .9rem; }
+th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid #eee; }
+th { background: #f2f2f2; font-size: .8rem; text-transform: uppercase; color: #555; }
+
+.pendente { background: #fff; border: 1px solid #c8102e; border-radius: 8px; padding: .8rem; margin-bottom: .5rem; }

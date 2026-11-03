@@ -1,7 +1,5 @@
-.venv/
-__pycache__/
-*.pyc
-*.db
+node_modules/
+backend/dados.json
 .env
 .vscode/
 .DS_Store

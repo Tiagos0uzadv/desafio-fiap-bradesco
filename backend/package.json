@@ -1,0 +1,12 @@
+{
+  "name": "sentinelaops",
+  "version": "1.0.0",
+  "description": "Desafio FIAP x Bradesco - Ambiente Inteligente e Autonomo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
