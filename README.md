@@ -86,9 +86,18 @@ backend/server.js    rotas da API e entrega do painel
 backend/gerador.js   gerador de dados simulados (2 fontes)
 backend/banco.js     armazenamento em arquivo JSON
 logica/regras.js     regras de decisão e níveis de autonomia
+logica/ia.js         integração com modelo de IA (com fallback)
 frontend/            painel: index.html, estilo.css, app.js
-docs/                contrato da API, diagrama, slides
+docs/                documentação técnica do MVP
+apresentacao/        roteiro da demo, falas e perguntas da banca
 ```
+
+## Documentação
+
+- **[docs/](docs/)** — visão geral, arquitetura, requisitos atendidos, cenário
+  completo e contrato da API
+- **[apresentacao/](apresentacao/)** — roteiro da demo, divisão das falas,
+  perguntas da banca e checklist de entrega
 
 ## Níveis de autonomia
 
