@@ -105,6 +105,11 @@ apresentacao/        roteiro da demo, falas e perguntas da banca
 postman/             coleção pronta para testar a API
 ```
 
+## Estado atual
+
+O que está pronto, o que falta e quem é responsável:
+**[ESTADO-DO-PROJETO.md](ESTADO-DO-PROJETO.md)**
+
 ## Documentação
 
 - **[docs/](docs/)** — visão geral, arquitetura, requisitos atendidos, cenário
