@@ -108,7 +108,7 @@ postman/             coleção pronta para testar a API
 ## Documentação
 
 - **[docs/](docs/)** — visão geral, arquitetura, requisitos atendidos, cenário
-  completo e contrato da API
+  completo, contrato da API e o **guia de estudo** para entender o código
 - **[apresentacao/](apresentacao/)** — roteiro da demo, divisão das falas,
   perguntas da banca e checklist de entrega
 - **[prompts/](prompts/)** — um prompt por pessoa, para começar já sabendo o
